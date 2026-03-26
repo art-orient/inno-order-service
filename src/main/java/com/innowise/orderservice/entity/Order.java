@@ -11,6 +11,20 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+@NamedEntityGraph(
+        name = "order-with-items",
+        attributeNodes = {
+                @NamedAttributeNode(value = "items", subgraph = "items-subgraph")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "items-subgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode("item")
+                        }
+                )
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor

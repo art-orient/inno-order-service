@@ -13,6 +13,6 @@ public record OrderResponseDto(
         BigDecimal totalPrice,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        List<OrderItemDto> items,
+        List<OrderItemResponseDto> items,
         UserDto user) {
 }

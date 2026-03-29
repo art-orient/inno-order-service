@@ -1,6 +1,7 @@
 package com.innowise.orderservice.mapper;
 
 import com.innowise.orderservice.dto.OrderItemDto;
+import com.innowise.orderservice.dto.OrderItemResponseDto;
 import com.innowise.orderservice.dto.OrderResponseDto;
 import com.innowise.orderservice.dto.UserDto;
 import com.innowise.orderservice.entity.Order;
@@ -19,24 +20,24 @@ public interface OrderMapper {
 
   List<OrderItem> toOrderItems(List<OrderItemDto> dtos);
 
+  @Mapping(target = "id", source = "order.id")
+  @Mapping(target = "userId", source = "order.userId")
+  @Mapping(target = "status", source = "order.status")
+  @Mapping(target = "totalPrice", source = "order.totalPrice")
+  @Mapping(target = "createdAt", source = "order.createdAt")
+  @Mapping(target = "updatedAt", source = "order.updatedAt")
+  @Mapping(target = "items", source = "order.items")
+  @Mapping(target = "user", source = "user")
   OrderResponseDto toOrderResponseDto(Order order, UserDto user);
 
-  @ObjectFactory
-  default OrderResponseDto createOrderResponseDto(Order order, UserDto user) {
-    return new OrderResponseDto(
-            order.getId(),
-            order.getUserId(),
-            order.getStatus(),
-            order.getTotalPrice(),
-            order.getCreatedAt(),
-            order.getUpdatedAt(),
-            toOrderItemDtos(order.getItems()),
-            user
-    );
-  }
-
+  @Mapping(target = "id", source = "id")
   @Mapping(target = "itemId", source = "item.id")
-  OrderItemDto toOrderItemDto(OrderItem entity);
+  @Mapping(target = "itemName", source = "item.name")
+  @Mapping(target = "itemPrice", source = "item.price")
+  @Mapping(target = "quantity", source = "quantity")
+  @Mapping(target = "createdAt", source = "createdAt")
+  @Mapping(target = "updatedAt", source = "updatedAt")
+  OrderItemResponseDto toOrderItemResponseDto(OrderItem entity);
 
-  List<OrderItemDto> toOrderItemDtos(List<OrderItem> entities);
+  List<OrderItemResponseDto> toOrderItemResponseDtos(List<OrderItem> entities);
 }

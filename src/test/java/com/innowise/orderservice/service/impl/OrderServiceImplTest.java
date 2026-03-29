@@ -10,6 +10,10 @@ import com.innowise.orderservice.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -42,15 +46,17 @@ class OrderServiceImplTest {
 
   @Test
   void create_success() {
-    OrderCreateRequestDto dto = new OrderCreateRequestDto("test@mail.com",
-            List.of(new OrderItemDto(1L, 2)));
+    OrderCreateRequestDto dto = new OrderCreateRequestDto(
+            "test@mail.com",
+            List.of(new OrderItemDto(1L, 2))
+    );
     UserDto user = new UserDto(10L, "test@mail.com", "John", "Doe");
     when(userClient.getByEmail("test@mail.com")).thenReturn(user);
     Item item = new Item();
     item.setId(1L);
+    item.setName("Test item");
     item.setPrice(BigDecimal.valueOf(100));
     when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
-
     Order savedOrder = new Order();
     savedOrder.setId(99L);
     savedOrder.setUserId(10L);
@@ -58,11 +64,24 @@ class OrderServiceImplTest {
     savedOrder.setItems(List.of());
     savedOrder.setTotalPrice(BigDecimal.valueOf(200));
     when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
-
+    OrderItemResponseDto itemResponse = new OrderItemResponseDto(
+            1L,
+            1L,
+            "Test item",
+            BigDecimal.valueOf(100),
+            2,
+            LocalDateTime.now(),
+            LocalDateTime.now()
+    );
     OrderResponseDto response = new OrderResponseDto(
-            99L, 10L, OrderStatus.CREATED, BigDecimal.valueOf(200),
-            LocalDateTime.now(), LocalDateTime.now(),
-            List.of(new OrderItemDto(1L, 2)), user
+            99L,
+            10L,
+            OrderStatus.CREATED,
+            BigDecimal.valueOf(200),
+            LocalDateTime.now(),
+            LocalDateTime.now(),
+            List.of(itemResponse),
+            user
     );
     when(orderMapper.toOrderResponseDto(savedOrder, user)).thenReturn(response);
     OrderResponseDto result = orderService.create(dto);
@@ -124,6 +143,47 @@ class OrderServiceImplTest {
     List<OrderResponseDto> result = orderService.getByUserId(10L);
     assertEquals(1, result.size());
     verify(orderRepository).findByUserId(10L);
+  }
+
+  @Test
+  void getWithFilter_success() {
+    LocalDateTime from = LocalDateTime.now().minusDays(1);
+    LocalDateTime to = LocalDateTime.now();
+    List<OrderStatus> statuses = List.of(OrderStatus.CREATED);
+    Pageable pageable = mock(Pageable.class);
+    Order order1 = new Order();
+    order1.setId(1L);
+    order1.setUserId(10L);
+    order1.setStatus(OrderStatus.CREATED);
+    Order order2 = new Order();
+    order2.setId(2L);
+    order2.setUserId(20L);
+    order2.setStatus(OrderStatus.CREATED);
+
+    Page<Order> page = new PageImpl<>(List.of(order1, order2));
+    when(orderRepository.findAll(
+            ArgumentMatchers.<Specification<Order>>any(),
+            eq(pageable)
+    )).thenReturn(page);
+    UserDto user10 = new UserDto(10L, "u10@mail", "John", "Doe");
+    UserDto user20 = new UserDto(20L, "u20@mail", "Jane", "Smith");
+    when(userClient.getById(10L)).thenReturn(user10);
+    when(userClient.getById(20L)).thenReturn(user20);
+
+    OrderResponseDto dto1 = mock(OrderResponseDto.class);
+    OrderResponseDto dto2 = mock(OrderResponseDto.class);
+    when(orderMapper.toOrderResponseDto(order1, user10)).thenReturn(dto1);
+    when(orderMapper.toOrderResponseDto(order2, user20)).thenReturn(dto2);
+    Page<OrderResponseDto> result = orderService.getWithFilter(from, to, statuses, pageable);
+    assertEquals(2, result.getContent().size());
+    assertTrue(result.getContent().contains(dto1));
+    assertTrue(result.getContent().contains(dto2));
+
+    verify(orderRepository).findAll(ArgumentMatchers.<Specification<Order>>any(), eq(pageable));
+    verify(userClient).getById(10L);
+    verify(userClient).getById(20L);
+    verify(orderMapper).toOrderResponseDto(order1, user10);
+    verify(orderMapper).toOrderResponseDto(order2, user20);
   }
 
   @Test

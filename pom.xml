@@ -24,12 +24,8 @@
             src/main/java/**/controller/**,
             src/main/java/**/entity/**,
             src/main/java/**/dto/**,
-            src/main/java/**/mapper/**,
             src/main/java/**/config/**,
             src/main/java/**/exception/**,
-            src/main/java/**/repository/**,
-            src/main/java/**/specification/**,
-            src/main/java/**/security/**,
             src/main/java/**/OrderServiceApplication.java
         </sonar.coverage.exclusions>
     </properties>
@@ -40,6 +36,13 @@
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
                 <version>1.19.8</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2023.0.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -87,6 +90,15 @@
             <artifactId>mapstruct-processor</artifactId>
             <version>1.5.5.Final</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot3</artifactId>
+            <version>2.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

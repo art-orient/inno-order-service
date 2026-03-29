@@ -2,6 +2,9 @@ server:
   port: 8082
 
 spring:
+  application:
+    name: order-service
+
   datasource:
     url: jdbc:postgresql://${ORDER_DB_HOST}:${ORDER_DB_PORT}/${ORDER_DB_NAME}
     username: ${ORDER_DB_USERNAME}
@@ -25,3 +28,19 @@ logging:
     org.springframework: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+user:
+  service:
+    url: http://localhost:8080
+
+auth:
+  service:
+    url: http://localhost:8081
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s

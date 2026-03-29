@@ -29,13 +29,11 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
-user:
-  service:
-    url: http://localhost:8080
+user-service:
+    url: http://localhost
 
-auth:
-  service:
-    url: http://localhost:8081
+auth-service:
+    url: http://localhost
 
 resilience4j:
   circuitbreaker:

@@ -14,5 +14,5 @@ public record OrderResponseDto(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<OrderItemDto> items,
-        UserDto user
-) {}
+        UserDto user) {
+}

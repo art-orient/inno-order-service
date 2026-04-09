@@ -158,7 +158,6 @@ class OrderServiceIntegrationTest {
     assertNotNull(response.updatedAt());
   }
 
-  // GET BY ID
   @Test
   void getById_success() {
     stubUserByEmail();
@@ -177,7 +176,6 @@ class OrderServiceIntegrationTest {
     assertEquals(1L, found.userId());
   }
 
-  // GET WITH FILTER
   @Test
   void getWithFilter_success() {
     stubUserByEmail();
@@ -204,7 +202,6 @@ class OrderServiceIntegrationTest {
     assertEquals(2, page.getTotalElements());
   }
 
-  // GET BY USER ID
   @Test
   void getByUserId_success() {
     stubUserByEmail();
@@ -223,7 +220,6 @@ class OrderServiceIntegrationTest {
     assertEquals(created.id(), list.get(0).id());
   }
 
-  // UPDATE
   @Test
   void update_success() {
     stubUserByEmail();
@@ -248,7 +244,6 @@ class OrderServiceIntegrationTest {
     assertEquals(created.id(), updated.id());
   }
 
-  // DELETE
   @Test
   void delete_success() {
     stubUserByEmail();

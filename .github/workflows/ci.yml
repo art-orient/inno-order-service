@@ -52,14 +52,14 @@ jobs:
 
       # 7. Build Docker Image
       - name: Build Docker image
-        run: docker build -t auth_service_app .
+        run: docker build -t order_service_app .
 
       # 8. Save Docker image as artifact
       - name: Save Docker image
-        run: docker save auth_service_app | gzip > auth_service_app.tar.gz
+        run: docker save order_service_app | gzip > order_service_app.tar.gz
 
       - name: Upload Docker artifact
         uses: actions/upload-artifact@v4
         with:
-          name: auth_service_docker_image
-          path: auth_service_app.tar.gz
+          name: order_service_docker_image
+          path: order_service_app.tar.gz

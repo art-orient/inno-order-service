@@ -17,13 +17,6 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(ex.getMessage()));
   }
 
-  @ExceptionHandler(EntityNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleNotFound(EntityNotFoundException ex) {
-    return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(new ErrorResponse(ex.getMessage()));
-  }
-
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
     String message = ex.getBindingResult().getFieldErrors().stream()
@@ -32,6 +25,6 @@ public class GlobalExceptionHandler {
             .orElse("Validation failed");
     return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorResponse(message));
+            .body(new ErrorResponse(message));g
   }
 }

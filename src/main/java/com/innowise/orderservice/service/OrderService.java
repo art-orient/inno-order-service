@@ -1,9 +1,9 @@
 package com.innowise.orderservice.service;
 
-import com.innowise.orderservice.dto.OrderCreateRequestDto;
-import com.innowise.orderservice.dto.OrderResponseDto;
-import com.innowise.orderservice.dto.OrderUpdateRequestDto;
-import com.innowise.orderservice.entity.OrderStatus;
+import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
+import com.innowise.orderservice.model.dto.OrderResponseDto;
+import com.innowise.orderservice.model.dto.OrderUpdateRequestDto;
+import com.innowise.orderservice.model.entity.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

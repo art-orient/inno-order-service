@@ -1,6 +1,6 @@
 package com.innowise.orderservice.client;
 
-import com.innowise.orderservice.dto.UserDto;
+import com.innowise.orderservice.model.dto.UserDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

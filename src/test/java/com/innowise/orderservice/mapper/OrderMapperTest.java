@@ -1,18 +1,17 @@
 package com.innowise.orderservice.mapper;
 
-import com.innowise.orderservice.dto.OrderItemDto;
-import com.innowise.orderservice.dto.OrderItemResponseDto;
-import com.innowise.orderservice.dto.OrderResponseDto;
-import com.innowise.orderservice.dto.UserDto;
-import com.innowise.orderservice.entity.Item;
-import com.innowise.orderservice.entity.Order;
-import com.innowise.orderservice.entity.OrderItem;
-import com.innowise.orderservice.entity.OrderStatus;
+import com.innowise.orderservice.model.dto.OrderItemDto;
+import com.innowise.orderservice.model.dto.OrderItemResponseDto;
+import com.innowise.orderservice.model.dto.OrderResponseDto;
+import com.innowise.orderservice.model.dto.UserDto;
+import com.innowise.orderservice.model.entity.Item;
+import com.innowise.orderservice.model.entity.Order;
+import com.innowise.orderservice.model.entity.OrderItem;
+import com.innowise.orderservice.model.entity.OrderStatus;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

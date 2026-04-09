@@ -1,6 +1,6 @@
-package com.innowise.orderservice.dto;
+package com.innowise.orderservice.model.dto;
 
-import com.innowise.orderservice.entity.OrderStatus;
+import com.innowise.orderservice.model.entity.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

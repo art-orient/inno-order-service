@@ -1,4 +1,4 @@
-package com.innowise.orderservice.entity;
+package com.innowise.orderservice.model.entity;
 
 public enum OrderStatus {
   CREATED,

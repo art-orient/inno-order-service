@@ -1,7 +1,7 @@
 package com.innowise.orderservice.repository.specification;
 
-import com.innowise.orderservice.entity.Order;
-import com.innowise.orderservice.entity.OrderStatus;
+import com.innowise.orderservice.model.entity.Order;
+import com.innowise.orderservice.model.entity.OrderStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;

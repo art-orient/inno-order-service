@@ -3,7 +3,6 @@ package com.innowise.orderservice.service.impl;
 import com.innowise.orderservice.client.UserClient;
 import com.innowise.orderservice.dto.*;
 import com.innowise.orderservice.entity.*;
-import com.innowise.orderservice.exception.OrderServiceException;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderItemDto;

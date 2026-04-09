@@ -1,9 +1,8 @@
 package com.innowise.orderservice.service.impl;
 
 import com.innowise.orderservice.client.UserClient;
-import com.innowise.orderservice.dto.*;
-import com.innowise.orderservice.entity.*;
-import com.innowise.orderservice.exception.OrderServiceException;
+import com.innowise.orderservice.exception.ExternalServiceUnavailableException;
+import com.innowise.orderservice.exception.NotFoundException;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.OrderUpdateRequestDto;
@@ -58,20 +57,20 @@ class OrderServiceImpl implements OrderService {
   }
 
   public OrderResponseDto createFallback(OrderCreateRequestDto dto, Throwable ex) {
-    throw new OrderServiceException(USER_SERVICE_UNAVAILABLE, ex);
+    throw new ExternalServiceUnavailableException(USER_SERVICE_UNAVAILABLE, ex);
   }
 
   @Override
   @CircuitBreaker(name = "userService", fallbackMethod = "getByIdFallback")
   public OrderResponseDto getById(Long id) {
     Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new OrderServiceException(ORDER_NOT_FOUND + id));
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND + id));
     UserDto user = userClient.getById(order.getUserId());
     return orderMapper.toOrderResponseDto(order, user);
   }
 
   public OrderResponseDto getByIdFallback(Long id, Throwable ex) {
-    throw new OrderServiceException(USER_SERVICE_UNAVAILABLE, ex);
+    throw new ExternalServiceUnavailableException(USER_SERVICE_UNAVAILABLE, ex);
   }
 
   @Override
@@ -98,7 +97,7 @@ class OrderServiceImpl implements OrderService {
           Pageable pageable,
           Throwable ex
   ) {
-    throw new OrderServiceException(USER_SERVICE_UNAVAILABLE, ex);
+    throw new ExternalServiceUnavailableException(USER_SERVICE_UNAVAILABLE, ex);
   }
 
   @Override
@@ -112,7 +111,7 @@ class OrderServiceImpl implements OrderService {
   }
 
   public List<OrderResponseDto> getByUserIdFallback(Long userId, Throwable ex) {
-    throw new OrderServiceException(USER_SERVICE_UNAVAILABLE, ex);
+    throw new ExternalServiceUnavailableException(USER_SERVICE_UNAVAILABLE, ex);
   }
 
   @Override
@@ -120,7 +119,7 @@ class OrderServiceImpl implements OrderService {
   @CircuitBreaker(name = "userService", fallbackMethod = "updateFallback")
   public OrderResponseDto update(Long id, OrderUpdateRequestDto dto) {
     Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new OrderServiceException(ORDER_NOT_FOUND + id));
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND + id));
     order.setStatus(dto.status());
     order.getItems().clear();
     List<OrderItem> newItems = orderMapper.toOrderItems(dto.items());
@@ -133,14 +132,14 @@ class OrderServiceImpl implements OrderService {
   }
 
   public OrderResponseDto updateFallback(Long id, OrderUpdateRequestDto dto, Throwable ex) {
-    throw new OrderServiceException(USER_SERVICE_UNAVAILABLE, ex);
+    throw new ExternalServiceUnavailableException(USER_SERVICE_UNAVAILABLE, ex);
   }
 
   @Override
   @Transactional
   public void delete(Long id) {
     Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new OrderServiceException(ORDER_NOT_FOUND + id));
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND + id));
     orderRepository.delete(order);
   }
 
@@ -155,7 +154,7 @@ class OrderServiceImpl implements OrderService {
     items.forEach(oi -> {
       Long itemId = oi.getItem().getId();
       Item item = itemRepository.findById(itemId)
-              .orElseThrow(() -> new OrderServiceException(ITEM_NOT_FOUND + itemId));
+              .orElseThrow(() -> new NotFoundException(ITEM_NOT_FOUND + itemId));
       oi.setItem(item);
       oi.setOrder(order);
     });

@@ -8,7 +8,6 @@ import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.OrderUpdateRequestDto;
 import com.innowise.orderservice.model.entity.Item;
 import com.innowise.orderservice.model.entity.OrderStatus;
-import com.innowise.orderservice.exception.OrderServiceException;
 import com.innowise.orderservice.repository.ItemRepository;
 import com.innowise.orderservice.repository.OrderItemRepository;
 import com.innowise.orderservice.repository.OrderRepository;

@@ -3,7 +3,6 @@ package com.innowise.orderservice.service.impl;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderUpdateRequestDto;
 import com.innowise.orderservice.model.entity.OrderStatus;
-import com.innowise.orderservice.exception.OrderServiceException;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 

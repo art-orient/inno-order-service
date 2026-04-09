@@ -2,6 +2,7 @@ package com.innowise.orderservice.integration;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.innowise.orderservice.exception.NotFoundException;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderItemDto;
 import com.innowise.orderservice.model.dto.OrderResponseDto;
@@ -138,15 +139,12 @@ class OrderServiceIntegrationTest {
   @Test
   void create_success() {
     stubUserByEmail();
-
     OrderCreateRequestDto dto =
             new OrderCreateRequestDto(
                     "test@mail.com",
                     List.of(new OrderItemDto(itemId, 1))
             );
-
     OrderResponseDto response = orderService.create(dto);
-
     assertNotNull(response);
     assertEquals("test@mail.com", response.user().email());
     assertEquals(1L, response.userId());
@@ -159,17 +157,13 @@ class OrderServiceIntegrationTest {
   @Test
   void getById_success() {
     stubUserByEmail();
-
     OrderResponseDto created =
             orderService.create(new OrderCreateRequestDto(
                     "test@mail.com",
                     List.of(new OrderItemDto(itemId, 1))
             ));
-
     stubUserById(1L);
-
     OrderResponseDto found = orderService.getById(created.id());
-
     assertEquals(created.id(), found.id());
     assertEquals(1L, found.userId());
   }
@@ -177,26 +171,21 @@ class OrderServiceIntegrationTest {
   @Test
   void getWithFilter_success() {
     stubUserByEmail();
-
     orderService.create(new OrderCreateRequestDto(
             "test@mail.com",
             List.of(new OrderItemDto(itemId, 1))
     ));
-
     orderService.create(new OrderCreateRequestDto(
             "test@mail.com",
             List.of(new OrderItemDto(itemId, 1))
     ));
-
     stubUserById(1L);
-
     Page<OrderResponseDto> page = orderService.getWithFilter(
             LocalDateTime.now().minusDays(1),
             LocalDateTime.now().plusDays(1),
             List.of(OrderStatus.CREATED),
             Pageable.unpaged()
     );
-
     assertEquals(2, page.getTotalElements());
   }
 
@@ -221,23 +210,18 @@ class OrderServiceIntegrationTest {
   @Test
   void update_success() {
     stubUserByEmail();
-
     OrderResponseDto created =
             orderService.create(new OrderCreateRequestDto(
                     "test@mail.com",
                     List.of(new OrderItemDto(itemId, 1))
             ));
-
     stubUserById(1L);
-
     OrderUpdateRequestDto updateDto =
             new OrderUpdateRequestDto(
                     OrderStatus.PAID,
                     List.of(new OrderItemDto(itemId, 1))
             );
-
     OrderResponseDto updated = orderService.update(created.id(), updateDto);
-
     assertEquals(OrderStatus.PAID, updated.status());
     assertEquals(created.id(), updated.id());
   }
@@ -245,16 +229,13 @@ class OrderServiceIntegrationTest {
   @Test
   void delete_success() {
     stubUserByEmail();
-
     OrderResponseDto created =
             orderService.create(new OrderCreateRequestDto(
                     "test@mail.com",
                     List.of(new OrderItemDto(itemId, 1))
             ));
-
     orderService.delete(created.id());
-
-    assertThrows(OrderServiceException.class,
+    assertThrows(NotFoundException.class,
             () -> orderService.getById(created.id()));
   }
 }

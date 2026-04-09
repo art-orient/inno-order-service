@@ -1,5 +1,6 @@
 package com.innowise.orderservice.service.impl;
 
+import com.innowise.orderservice.exception.ExternalServiceUnavailableException;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderUpdateRequestDto;
 import com.innowise.orderservice.model.entity.OrderStatus;
@@ -21,8 +22,8 @@ class OrderServiceFallbackTest {
   @Test
   void createFallback_throwsException() {
     OrderCreateRequestDto dto = new OrderCreateRequestDto("mail@mail.com", List.of());
-    OrderServiceException ex = assertThrows(
-            OrderServiceException.class,
+    ExternalServiceUnavailableException ex = assertThrows(
+            ExternalServiceUnavailableException.class,
             () -> service.createFallback(dto, cause)
     );
     assertEquals(USER_SERVICE_UNAVAILABLE, ex.getMessage());
@@ -32,8 +33,8 @@ class OrderServiceFallbackTest {
   @Test
   void getByIdFallback_throwsException() {
     Long id = 1L;
-    OrderServiceException ex = assertThrows(
-            OrderServiceException.class,
+    ExternalServiceUnavailableException ex = assertThrows(
+            ExternalServiceUnavailableException.class,
             () -> service.getByIdFallback(id, cause)
     );
     assertEquals(USER_SERVICE_UNAVAILABLE, ex.getMessage());
@@ -46,8 +47,8 @@ class OrderServiceFallbackTest {
     LocalDateTime to = LocalDateTime.now();
     List<OrderStatus> statuses = List.of(OrderStatus.CREATED);
     Pageable pageable = Pageable.unpaged();
-    OrderServiceException ex = assertThrows(
-            OrderServiceException.class,
+    ExternalServiceUnavailableException ex = assertThrows(
+            ExternalServiceUnavailableException.class,
             () -> service.getWithFilterFallback(from, to, statuses, pageable, cause)
     );
     assertEquals(USER_SERVICE_UNAVAILABLE, ex.getMessage());
@@ -57,8 +58,8 @@ class OrderServiceFallbackTest {
   @Test
   void getByUserIdFallback_throwsException() {
     Long userId = 10L;
-    OrderServiceException ex = assertThrows(
-            OrderServiceException.class,
+    ExternalServiceUnavailableException ex = assertThrows(
+            ExternalServiceUnavailableException.class,
             () -> service.getByUserIdFallback(userId, cause)
     );
     assertEquals(USER_SERVICE_UNAVAILABLE, ex.getMessage());
@@ -70,8 +71,8 @@ class OrderServiceFallbackTest {
     Long id = 1L;
     OrderUpdateRequestDto dto =
             new OrderUpdateRequestDto(OrderStatus.PAID, List.of());
-    OrderServiceException ex = assertThrows(
-            OrderServiceException.class,
+    ExternalServiceUnavailableException ex = assertThrows(
+            ExternalServiceUnavailableException.class,
             () -> service.updateFallback(id, dto, cause)
     );
     assertEquals(USER_SERVICE_UNAVAILABLE, ex.getMessage());

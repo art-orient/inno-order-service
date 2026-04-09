@@ -1,8 +1,7 @@
 package com.innowise.orderservice.service.impl;
 
 import com.innowise.orderservice.client.UserClient;
-import com.innowise.orderservice.dto.*;
-import com.innowise.orderservice.entity.*;
+import com.innowise.orderservice.exception.NotFoundException;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderItemDto;
@@ -114,7 +113,7 @@ class OrderServiceImplTest {
     oi.setQuantity(1);
     when(orderMapper.toOrderItems(dto.items())).thenReturn(List.of(oi));
     when(itemRepository.findById(5L)).thenReturn(Optional.empty());
-    assertThrows(OrderServiceException.class, () -> orderService.create(dto));
+    assertThrows(NotFoundException.class, () -> orderService.create(dto));
   }
 
   @Test
@@ -136,7 +135,7 @@ class OrderServiceImplTest {
   @Test
   void getById_notFound_throwsException() {
     when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-    assertThrows(OrderServiceException.class, () -> orderService.getById(1L));
+    assertThrows(NotFoundException.class, () -> orderService.getById(1L));
   }
 
   @Test
@@ -226,7 +225,7 @@ class OrderServiceImplTest {
   @Test
   void update_orderNotFound_throwsException() {
     when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-    assertThrows(OrderServiceException.class, () -> orderService.update(1L, mock(OrderUpdateRequestDto.class)));
+    assertThrows(NotFoundException.class, () -> orderService.update(1L, mock(OrderUpdateRequestDto.class)));
   }
 
   @Test
@@ -240,6 +239,6 @@ class OrderServiceImplTest {
   @Test
   void delete_notFound_throwsException() {
     when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-    assertThrows(OrderServiceException.class, () -> orderService.delete(1L));
+    assertThrows(NotFoundException.class, () -> orderService.delete(1L));
   }
 }

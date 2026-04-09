@@ -2,7 +2,6 @@ package com.innowise.orderservice.integration;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.innowise.orderservice.exception.NotFoundException;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderItemDto;
 import com.innowise.orderservice.model.dto.OrderResponseDto;
@@ -235,7 +234,6 @@ class OrderServiceIntegrationTest {
                     List.of(new OrderItemDto(itemId, 1))
             ));
     orderService.delete(created.id());
-    assertThrows(NotFoundException.class,
-            () -> orderService.getById(created.id()));
+    assertTrue(orderRepository.findById(created.id()).isEmpty());
   }
 }

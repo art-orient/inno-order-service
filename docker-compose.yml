@@ -15,6 +15,7 @@ services:
       ORDER_DB_NAME: ${ORDER_DB_NAME}
       ORDER_DB_USERNAME: ${ORDER_DB_USERNAME}
       ORDER_DB_PASSWORD: ${ORDER_DB_PASSWORD}
+      USER_SERVICE_URL: http://user-service:8080
 
     depends_on:
       - postgres

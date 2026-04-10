@@ -1,6 +1,8 @@
 package com.innowise.orderservice.service.impl;
 
 import com.innowise.orderservice.client.UserClient;
+import com.innowise.orderservice.dao.ItemDao;
+import com.innowise.orderservice.dao.OrderDao;
 import com.innowise.orderservice.exception.NotFoundException;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
@@ -13,8 +15,6 @@ import com.innowise.orderservice.model.entity.Item;
 import com.innowise.orderservice.model.entity.Order;
 import com.innowise.orderservice.model.entity.OrderItem;
 import com.innowise.orderservice.model.entity.OrderStatus;
-import com.innowise.orderservice.repository.ItemRepository;
-import com.innowise.orderservice.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -33,10 +33,10 @@ import static org.mockito.Mockito.*;
 class OrderServiceImplTest {
 
   @Mock
-  private OrderRepository orderRepository;
+  private OrderDao orderDao;
 
   @Mock
-  private ItemRepository itemRepository;
+  private ItemDao itemDao;
 
   @Mock
   private OrderMapper orderMapper;
@@ -60,18 +60,29 @@ class OrderServiceImplTest {
     );
     UserDto user = new UserDto(10L, "test@mail.com", "John", "Doe");
     when(userClient.getByEmail("test@mail.com")).thenReturn(user);
+
+    OrderItem mappedItem = new OrderItem();
+    Item stubItem = new Item();
+    stubItem.setId(1L);
+    mappedItem.setItem(stubItem);
+    mappedItem.setQuantity(2);
+    when(orderMapper.toOrderItems(dto.items()))
+            .thenReturn(List.of(mappedItem));
+
     Item item = new Item();
     item.setId(1L);
     item.setName("Test item");
     item.setPrice(BigDecimal.valueOf(100));
-    when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+    when(itemDao.findById(1L)).thenReturn(Optional.of(item));
+
     Order savedOrder = new Order();
     savedOrder.setId(99L);
     savedOrder.setUserId(10L);
     savedOrder.setStatus(OrderStatus.CREATED);
     savedOrder.setItems(List.of());
     savedOrder.setTotalPrice(BigDecimal.valueOf(200));
-    when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+    when(orderDao.save(any(Order.class))).thenReturn(savedOrder);
+
     OrderItemResponseDto itemResponse = new OrderItemResponseDto(
             1L,
             1L,
@@ -92,11 +103,12 @@ class OrderServiceImplTest {
             user
     );
     when(orderMapper.toOrderResponseDto(savedOrder, user)).thenReturn(response);
+
     OrderResponseDto result = orderService.create(dto);
     assertEquals(99L, result.id());
     assertEquals(10L, result.userId());
     assertEquals(BigDecimal.valueOf(200), result.totalPrice());
-    verify(orderRepository).save(any(Order.class));
+    verify(orderDao).save(any(Order.class));
     verify(userClient).getByEmail("test@mail.com");
   }
 
@@ -112,7 +124,7 @@ class OrderServiceImplTest {
     oi.setItem(stubItem);
     oi.setQuantity(1);
     when(orderMapper.toOrderItems(dto.items())).thenReturn(List.of(oi));
-    when(itemRepository.findById(5L)).thenReturn(Optional.empty());
+    when(itemDao.findById(5L)).thenReturn(Optional.empty());
     assertThrows(NotFoundException.class, () -> orderService.create(dto));
   }
 
@@ -121,20 +133,20 @@ class OrderServiceImplTest {
     Order order = new Order();
     order.setId(1L);
     order.setUserId(10L);
-    when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+    when(orderDao.findById(1L)).thenReturn(Optional.of(order));
     UserDto user = new UserDto(10L, "mail", "John", "Doe");
     when(userClient.getById(10L)).thenReturn(user);
     OrderResponseDto dto = mock(OrderResponseDto.class);
     when(orderMapper.toOrderResponseDto(order, user)).thenReturn(dto);
     OrderResponseDto result = orderService.getById(1L);
     assertNotNull(result);
-    verify(orderRepository).findById(1L);
+    verify(orderDao).findById(1L);
     verify(userClient).getById(10L);
   }
 
   @Test
   void getById_notFound_throwsException() {
-    when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+    when(orderDao.findById(1L)).thenReturn(Optional.empty());
     assertThrows(NotFoundException.class, () -> orderService.getById(1L));
   }
 
@@ -143,14 +155,14 @@ class OrderServiceImplTest {
     Order order = new Order();
     order.setId(1L);
     order.setUserId(10L);
-    when(orderRepository.findByUserId(10L)).thenReturn(List.of(order));
+    when(orderDao.findByUserId(10L)).thenReturn(List.of(order));
     UserDto user = new UserDto(10L, "mail", "John", "Doe");
     when(userClient.getById(10L)).thenReturn(user);
     OrderResponseDto dto = mock(OrderResponseDto.class);
     when(orderMapper.toOrderResponseDto(order, user)).thenReturn(dto);
     List<OrderResponseDto> result = orderService.getByUserId(10L);
     assertEquals(1, result.size());
-    verify(orderRepository).findByUserId(10L);
+    verify(orderDao).findByUserId(10L);
   }
 
   @Test
@@ -169,7 +181,7 @@ class OrderServiceImplTest {
     order2.setStatus(OrderStatus.CREATED);
 
     Page<Order> page = new PageImpl<>(List.of(order1, order2));
-    when(orderRepository.findAll(
+    when(orderDao.findAll(
             ArgumentMatchers.<Specification<Order>>any(),
             eq(pageable)
     )).thenReturn(page);
@@ -187,7 +199,7 @@ class OrderServiceImplTest {
     assertTrue(result.getContent().contains(dto1));
     assertTrue(result.getContent().contains(dto2));
 
-    verify(orderRepository).findAll(ArgumentMatchers.<Specification<Order>>any(), eq(pageable));
+    verify(orderDao).findAll(ArgumentMatchers.<Specification<Order>>any(), eq(pageable));
     verify(userClient).getById(10L);
     verify(userClient).getById(20L);
     verify(orderMapper).toOrderResponseDto(order1, user10);
@@ -200,13 +212,13 @@ class OrderServiceImplTest {
     order.setId(1L);
     order.setUserId(10L);
     order.setItems(new ArrayList<>());
-    when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+    when(orderDao.findById(1L)).thenReturn(Optional.of(order));
     OrderUpdateRequestDto dto = new OrderUpdateRequestDto(OrderStatus.PAID,
             List.of(new OrderItemDto(1L, 3)));
     Item item = new Item();
     item.setId(1L);
     item.setPrice(BigDecimal.valueOf(50));
-    when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+    when(itemDao.findById(1L)).thenReturn(Optional.of(item));
     OrderItem mappedItem = new OrderItem();
     mappedItem.setItem(item);
     mappedItem.setQuantity(3);
@@ -224,21 +236,21 @@ class OrderServiceImplTest {
 
   @Test
   void update_orderNotFound_throwsException() {
-    when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+    when(orderDao.findById(1L)).thenReturn(Optional.empty());
     assertThrows(NotFoundException.class, () -> orderService.update(1L, mock(OrderUpdateRequestDto.class)));
   }
 
   @Test
   void delete_success() {
     Order order = new Order();
-    when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+    when(orderDao.findById(1L)).thenReturn(Optional.of(order));
     orderService.delete(1L);
-    verify(orderRepository).delete(order);
+    verify(orderDao).delete(order);
   }
 
   @Test
   void delete_notFound_throwsException() {
-    when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+    when(orderDao.findById(1L)).thenReturn(Optional.empty());
     assertThrows(NotFoundException.class, () -> orderService.delete(1L));
   }
 }

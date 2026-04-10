@@ -223,6 +223,23 @@ class OrderControllerIntegrationTest {
   }
 
   @Test
+  void getOrdersByUserId_returns200() throws Exception {
+    stubGetByEmail();
+    String response = mockMvc.perform(post("/api/orders")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(createOrderJson()))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    long orderId = extractId(response);
+    stubGetById(1L);
+    mockMvc.perform(get("/api/orders/user/{userId}", 1L))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(orderId))
+            .andExpect(jsonPath("$[0].userId").value(1L));
+  }
+
+  @Test
   void deleteOrder_returns204() throws Exception {
     stubGetByEmail();
     String response = mockMvc.perform(post("/api/orders")

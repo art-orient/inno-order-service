@@ -23,3 +23,6 @@ spring:
 logging:
   level:
     org.springframework: INFO
+
+user-service:
+  url: ${USER_SERVICE_URL}

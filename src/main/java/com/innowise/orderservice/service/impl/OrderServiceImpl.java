@@ -1,6 +1,8 @@
 package com.innowise.orderservice.service.impl;
 
 import com.innowise.orderservice.client.UserClient;
+import com.innowise.orderservice.dao.ItemDao;
+import com.innowise.orderservice.dao.OrderDao;
 import com.innowise.orderservice.exception.ExternalServiceUnavailableException;
 import com.innowise.orderservice.exception.NotFoundException;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
@@ -11,7 +13,6 @@ import com.innowise.orderservice.model.entity.Item;
 import com.innowise.orderservice.model.entity.Order;
 import com.innowise.orderservice.model.entity.OrderItem;
 import com.innowise.orderservice.model.entity.OrderStatus;
-import com.innowise.orderservice.repository.*;
 import com.innowise.orderservice.repository.specification.OrderSpecification;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.service.OrderService;
@@ -33,8 +34,8 @@ class OrderServiceImpl implements OrderService {
   public static final String ORDER_NOT_FOUND = "Order not found: ";
   public static final String ITEM_NOT_FOUND = "Item not found: ";
   public static final String USER_SERVICE_UNAVAILABLE = "User Service unavailable";
-  private final OrderRepository orderRepository;
-  private final ItemRepository itemRepository;
+  private final OrderDao orderDao;
+  private final ItemDao itemDao;
   private final OrderMapper orderMapper;
   private final UserClient userClient;
 
@@ -52,7 +53,7 @@ class OrderServiceImpl implements OrderService {
     BigDecimal total = calculateTotalPrice(items);
     order.setTotalPrice(total);
     order.setItems(items);
-    Order saved = orderRepository.save(order);
+    Order saved = orderDao.save(order);
     return orderMapper.toOrderResponseDto(saved, user);
   }
 
@@ -63,7 +64,7 @@ class OrderServiceImpl implements OrderService {
   @Override
   @CircuitBreaker(name = "userService", fallbackMethod = "getByIdFallback")
   public OrderResponseDto getById(Long id) {
-    Order order = orderRepository.findById(id)
+    Order order = orderDao.findById(id)
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND + id));
     UserDto user = userClient.getById(order.getUserId());
     return orderMapper.toOrderResponseDto(order, user);
@@ -74,7 +75,7 @@ class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  @CircuitBreaker(name = "userService", fallbackMethod = "getByIdFallback")
+  @CircuitBreaker(name = "userService", fallbackMethod = "getWithFilterFallback")
   public Page<OrderResponseDto> getWithFilter(LocalDateTime from,
                                               LocalDateTime to,
                                               List<OrderStatus> statuses,
@@ -83,7 +84,7 @@ class OrderServiceImpl implements OrderService {
             OrderSpecification.createdBetween(from, to),
             OrderSpecification.hasStatus(statuses)
     );
-    Page<Order> page = orderRepository.findAll(spec, pageable);
+    Page<Order> page = orderDao.findAll(spec, pageable);
     return page.map(order -> {
       UserDto user = userClient.getById(order.getUserId());
       return orderMapper.toOrderResponseDto(order, user);
@@ -101,9 +102,9 @@ class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  @CircuitBreaker(name = "userService", fallbackMethod = "getByIdFallback")
+  @CircuitBreaker(name = "userService", fallbackMethod = "getByUserIdFallback")
   public List<OrderResponseDto> getByUserId(Long userId) {
-    List<Order> orders = orderRepository.findByUserId(userId);
+    List<Order> orders = orderDao.findByUserId(userId);
     UserDto user = userClient.getById(userId);
     return orders.stream()
             .map(order -> orderMapper.toOrderResponseDto(order, user))
@@ -118,7 +119,7 @@ class OrderServiceImpl implements OrderService {
   @Transactional
   @CircuitBreaker(name = "userService", fallbackMethod = "updateFallback")
   public OrderResponseDto update(Long id, OrderUpdateRequestDto dto) {
-    Order order = orderRepository.findById(id)
+    Order order = orderDao.findById(id)
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND + id));
     order.setStatus(dto.status());
     order.getItems().clear();
@@ -138,9 +139,9 @@ class OrderServiceImpl implements OrderService {
   @Override
   @Transactional
   public void delete(Long id) {
-    Order order = orderRepository.findById(id)
+    Order order = orderDao.findById(id)
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND + id));
-    orderRepository.delete(order);
+    orderDao.delete(order);
   }
 
   private BigDecimal calculateTotalPrice(List<OrderItem> items) {
@@ -153,7 +154,7 @@ class OrderServiceImpl implements OrderService {
   private List<OrderItem> resolveOrderItems(List<OrderItem> items, Order order) {
     items.forEach(oi -> {
       Long itemId = oi.getItem().getId();
-      Item item = itemRepository.findById(itemId)
+      Item item = itemDao.findById(itemId)
               .orElseThrow(() -> new NotFoundException(ITEM_NOT_FOUND + itemId));
       oi.setItem(item);
       oi.setOrder(order);

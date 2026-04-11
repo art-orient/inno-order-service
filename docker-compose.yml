@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: order_service_app
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+      # Database (Spring Boot env variables)
+      ORDER_DB_HOST: postgres
+      ORDER_DB_PORT: 5432
+      ORDER_DB_NAME: ${ORDER_DB_NAME}
+      ORDER_DB_USERNAME: ${ORDER_DB_USERNAME}
+      ORDER_DB_PASSWORD: ${ORDER_DB_PASSWORD}
+      USER_SERVICE_URL: http://user-service:8080
+
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: order_service_postgres
+    environment:
+      POSTGRES_DB: ${ORDER_DB_NAME}
+      POSTGRES_USER: ${ORDER_DB_USERNAME}
+      POSTGRES_PASSWORD: ${ORDER_DB_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

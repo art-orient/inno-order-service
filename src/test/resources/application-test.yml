@@ -1,0 +1,8 @@
+user-service:
+  url: http://localhost
+
+logging:
+  level:
+    org.springframework.cloud.openfeign: DEBUG
+    org.springframework.web.client: DEBUG
+    httpclient.wire: DEBUG

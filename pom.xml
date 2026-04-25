@@ -26,6 +26,7 @@
             src/main/java/**/dto/**,
             src/main/java/**/config/**,
             src/main/java/**/exception/**,
+            src/main/java/**/kafka/**,
             src/main/java/**/OrderServiceApplication.java
         </sonar.coverage.exclusions>
     </properties>
@@ -125,6 +126,10 @@
             <artifactId>wiremock-standalone</artifactId>
             <version>3.3.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
     </dependencies>
 

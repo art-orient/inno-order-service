@@ -20,6 +20,9 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yml
 
+  kafka:
+    bootstrap-servers: localhost:9092
+
 logging:
   level:
     org.springframework: DEBUG

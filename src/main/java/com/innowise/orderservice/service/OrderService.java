@@ -1,5 +1,6 @@
 package com.innowise.orderservice.service;
 
+import com.innowise.orderservice.dao.PaymentEventDto;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.OrderUpdateRequestDto;
@@ -72,4 +73,14 @@ public interface OrderService {
    * @param id order identifier
    */
   void delete(Long id);
+
+  /**
+   * Updates the status of an existing order based on the provided payment event.
+   * <p>
+   * The method retrieves the order by its identifier from the event and updates
+   * its status depending on the payment result contained in the event.
+   *
+   * @param event the payment event containing the order identifier and payment status
+   */
+  void updateOrderStatus(PaymentEventDto event);
 }

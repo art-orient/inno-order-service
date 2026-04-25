@@ -3,6 +3,7 @@ package com.innowise.orderservice.service.impl;
 import com.innowise.orderservice.client.UserClient;
 import com.innowise.orderservice.dao.ItemDao;
 import com.innowise.orderservice.dao.OrderDao;
+import com.innowise.orderservice.dao.PaymentEventDto;
 import com.innowise.orderservice.exception.ExternalServiceUnavailableException;
 import com.innowise.orderservice.exception.NotFoundException;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
@@ -142,6 +143,17 @@ class OrderServiceImpl implements OrderService {
     Order order = orderDao.findById(id)
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND + id));
     orderDao.delete(order);
+  }
+
+  public void updateOrderStatus(PaymentEventDto event) {
+    Order order = orderDao.findById(event.orderId())
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND + event.orderId()));
+    if ("SUCCESS".equals(event.status())) {
+      order.setStatus(OrderStatus.PAID);
+    } else {
+      order.setStatus(OrderStatus.FAILED_PAYMENT);
+    }
+    orderDao.save(order);
   }
 
   private BigDecimal calculateTotalPrice(List<OrderItem> items) {

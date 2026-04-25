@@ -6,3 +6,9 @@ logging:
     org.springframework.cloud.openfeign: DEBUG
     org.springframework.web.client: DEBUG
     httpclient.wire: DEBUG
+
+spring:
+  kafka:
+    bootstrap-servers: dummy:9092
+    consumer:
+      auto-offset-reset: earliest

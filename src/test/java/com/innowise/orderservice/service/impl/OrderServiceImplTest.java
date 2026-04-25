@@ -3,6 +3,7 @@ package com.innowise.orderservice.service.impl;
 import com.innowise.orderservice.client.UserClient;
 import com.innowise.orderservice.dao.ItemDao;
 import com.innowise.orderservice.dao.OrderDao;
+import com.innowise.orderservice.dao.PaymentEventDto;
 import com.innowise.orderservice.exception.NotFoundException;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
@@ -252,5 +253,39 @@ class OrderServiceImplTest {
   void delete_notFound_throwsException() {
     when(orderDao.findById(1L)).thenReturn(Optional.empty());
     assertThrows(NotFoundException.class, () -> orderService.delete(1L));
+  }
+
+  @Test
+  void updateOrderStatus_successToPaid() {
+    PaymentEventDto event = new PaymentEventDto("p-1", 1L, 10L,
+            "SUCCESS", BigDecimal.TEN);
+    Order order = new Order();
+    order.setId(1L);
+    order.setStatus(OrderStatus.CREATED);
+    when(orderDao.findById(1L)).thenReturn(Optional.of(order));
+    orderService.updateOrderStatus(event);
+    assertEquals(OrderStatus.PAID, order.getStatus());
+    verify(orderDao).save(order);
+  }
+
+  @Test
+  void updateOrderStatus_failedToFailedPayment() {
+    PaymentEventDto event = new PaymentEventDto("p-1", 1L, 10L,
+            "FAILED", BigDecimal.TEN);
+    Order order = new Order();
+    order.setId(1L);
+    order.setStatus(OrderStatus.CREATED);
+    when(orderDao.findById(1L)).thenReturn(Optional.of(order));
+    orderService.updateOrderStatus(event);
+    assertEquals(OrderStatus.FAILED_PAYMENT, order.getStatus());
+    verify(orderDao).save(order);
+  }
+
+  @Test
+  void updateOrderStatus_orderNotFound_throwsException() {
+    PaymentEventDto event = new PaymentEventDto("p-1", 1L, 10L,
+            "SUCCESS", BigDecimal.TEN);
+    when(orderDao.findById(1L)).thenReturn(Optional.empty());
+    assertThrows(NotFoundException.class, () -> orderService.updateOrderStatus(event));
   }
 }

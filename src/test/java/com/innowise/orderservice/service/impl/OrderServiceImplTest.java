@@ -3,8 +3,8 @@ package com.innowise.orderservice.service.impl;
 import com.innowise.orderservice.client.UserClient;
 import com.innowise.orderservice.dao.ItemDao;
 import com.innowise.orderservice.dao.OrderDao;
-import com.innowise.orderservice.dao.PaymentEventDto;
 import com.innowise.orderservice.exception.NotFoundException;
+import com.innowise.orderservice.kafka.PaymentEvent;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderItemDto;
@@ -16,15 +16,16 @@ import com.innowise.orderservice.model.entity.Item;
 import com.innowise.orderservice.model.entity.Order;
 import com.innowise.orderservice.model.entity.OrderItem;
 import com.innowise.orderservice.model.entity.OrderStatus;
+import com.innowise.orderservice.model.entity.PaymentStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -183,7 +184,7 @@ class OrderServiceImplTest {
 
     Page<Order> page = new PageImpl<>(List.of(order1, order2));
     when(orderDao.findAll(
-            ArgumentMatchers.<Specification<Order>>any(),
+            ArgumentMatchers.any(),
             eq(pageable)
     )).thenReturn(page);
     UserDto user10 = new UserDto(10L, "u10@mail", "John", "Doe");
@@ -200,7 +201,7 @@ class OrderServiceImplTest {
     assertTrue(result.getContent().contains(dto1));
     assertTrue(result.getContent().contains(dto2));
 
-    verify(orderDao).findAll(ArgumentMatchers.<Specification<Order>>any(), eq(pageable));
+    verify(orderDao).findAll(ArgumentMatchers.any(), eq(pageable));
     verify(userClient).getById(10L);
     verify(userClient).getById(20L);
     verify(orderMapper).toOrderResponseDto(order1, user10);
@@ -257,8 +258,7 @@ class OrderServiceImplTest {
 
   @Test
   void updateOrderStatus_successToPaid() {
-    PaymentEventDto event = new PaymentEventDto("p-1", 1L, 10L,
-            "SUCCESS", BigDecimal.TEN);
+    PaymentEvent event = new PaymentEvent(1L, "p-10", PaymentStatus.SUCCESS, Instant.now());
     Order order = new Order();
     order.setId(1L);
     order.setStatus(OrderStatus.CREATED);
@@ -270,8 +270,7 @@ class OrderServiceImplTest {
 
   @Test
   void updateOrderStatus_failedToFailedPayment() {
-    PaymentEventDto event = new PaymentEventDto("p-1", 1L, 10L,
-            "FAILED", BigDecimal.TEN);
+    PaymentEvent event = new PaymentEvent(1L, "p-10", PaymentStatus.FAILED, Instant.now());
     Order order = new Order();
     order.setId(1L);
     order.setStatus(OrderStatus.CREATED);
@@ -283,9 +282,9 @@ class OrderServiceImplTest {
 
   @Test
   void updateOrderStatus_orderNotFound_throwsException() {
-    PaymentEventDto event = new PaymentEventDto("p-1", 1L, 10L,
-            "SUCCESS", BigDecimal.TEN);
+    PaymentEvent event = new PaymentEvent(1L, "p-10", PaymentStatus.SUCCESS, Instant.now());
     when(orderDao.findById(1L)).thenReturn(Optional.empty());
-    assertThrows(NotFoundException.class, () -> orderService.updateOrderStatus(event));
+    orderService.updateOrderStatus(event);
+    verify(orderDao, never()).save(any());
   }
 }

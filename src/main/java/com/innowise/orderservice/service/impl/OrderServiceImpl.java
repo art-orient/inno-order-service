@@ -3,9 +3,9 @@ package com.innowise.orderservice.service.impl;
 import com.innowise.orderservice.client.UserClient;
 import com.innowise.orderservice.dao.ItemDao;
 import com.innowise.orderservice.dao.OrderDao;
-import com.innowise.orderservice.dao.PaymentEventDto;
 import com.innowise.orderservice.exception.ExternalServiceUnavailableException;
 import com.innowise.orderservice.exception.NotFoundException;
+import com.innowise.orderservice.kafka.PaymentEvent;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.OrderUpdateRequestDto;
@@ -14,6 +14,7 @@ import com.innowise.orderservice.model.entity.Item;
 import com.innowise.orderservice.model.entity.Order;
 import com.innowise.orderservice.model.entity.OrderItem;
 import com.innowise.orderservice.model.entity.OrderStatus;
+import com.innowise.orderservice.model.entity.PaymentStatus;
 import com.innowise.orderservice.repository.specification.OrderSpecification;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.service.OrderService;
@@ -23,7 +24,6 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -145,15 +145,16 @@ class OrderServiceImpl implements OrderService {
     orderDao.delete(order);
   }
 
-  public void updateOrderStatus(PaymentEventDto event) {
-    Order order = orderDao.findById(event.orderId())
-            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND + event.orderId()));
-    if ("SUCCESS".equals(event.status())) {
-      order.setStatus(OrderStatus.PAID);
-    } else {
-      order.setStatus(OrderStatus.FAILED_PAYMENT);
-    }
-    orderDao.save(order);
+  public void updateOrderStatus(PaymentEvent event) {
+    orderDao.findById(event.orderId())
+            .ifPresent(order -> {
+              if (event.status() == PaymentStatus.SUCCESS) {
+                order.setStatus(OrderStatus.PAID);
+              } else if (event.status() == PaymentStatus.FAILED) {
+                order.setStatus(OrderStatus.FAILED_PAYMENT);
+              }
+              orderDao.save(order);
+            });
   }
 
   private BigDecimal calculateTotalPrice(List<OrderItem> items) {

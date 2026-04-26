@@ -1,6 +1,6 @@
 package com.innowise.orderservice.service;
 
-import com.innowise.orderservice.dao.PaymentEventDto;
+import com.innowise.orderservice.kafka.PaymentEvent;
 import com.innowise.orderservice.model.dto.OrderCreateRequestDto;
 import com.innowise.orderservice.model.dto.OrderResponseDto;
 import com.innowise.orderservice.model.dto.OrderUpdateRequestDto;
@@ -82,5 +82,5 @@ public interface OrderService {
    *
    * @param event the payment event containing the order identifier and payment status
    */
-  void updateOrderStatus(PaymentEventDto event);
+  void updateOrderStatus(PaymentEvent event);
 }

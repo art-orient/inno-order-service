@@ -27,8 +27,9 @@ logging:
   level:
     org.springframework: INFO
 
-user-service:
-  url: ${USER_SERVICE_URL}
+services:
+  user:
+    url: http://user-service:8080
 
 management:
   endpoints:

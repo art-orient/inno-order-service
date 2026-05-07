@@ -23,17 +23,29 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yml
 
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: order-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    listener:
+      missing-topics-fatal: false
+
 logging:
   level:
     org.springframework: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
-user-service:
-    url: http://localhost
-
-auth-service:
-    url: http://localhost
+services:
+  user:
+    url: http://localhost:8080
+  auth:
+    url: http://localhost:8081
 
 resilience4j:
   circuitbreaker:

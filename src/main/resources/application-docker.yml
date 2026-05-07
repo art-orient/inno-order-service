@@ -20,9 +20,22 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yml
 
+  kafka:
+    bootstrap-servers: kafka:9092
+
 logging:
   level:
     org.springframework: INFO
 
-user-service:
-  url: ${USER_SERVICE_URL}
+services:
+  user:
+    url: http://user-service:8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

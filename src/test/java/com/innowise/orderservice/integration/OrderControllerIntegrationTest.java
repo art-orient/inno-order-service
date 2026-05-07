@@ -55,7 +55,7 @@ class OrderControllerIntegrationTest {
 
   @Container
   static final PostgreSQLContainer<?> postgres =
-          new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"))
+          new PostgreSQLContainer<>(DockerImageName.parse("postgres:15"))
                   .withDatabaseName("orders")
                   .withUsername("postgres")
                   .withPassword("postgres");
@@ -65,7 +65,7 @@ class OrderControllerIntegrationTest {
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
     registry.add("spring.datasource.username", postgres::getUsername);
     registry.add("spring.datasource.password", postgres::getPassword);
-    registry.add("user-service.url", () -> "http://localhost:" + wireMock.port());
+    registry.add("services.user.url", () -> "http://localhost:" + wireMock.port());
   }
 
   @BeforeAll

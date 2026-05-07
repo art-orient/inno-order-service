@@ -1,5 +1,6 @@
-user-service:
-  url: http://localhost
+services:
+  user:
+    url: http://localhost:${wiremock.server.port}
 
 logging:
   level:
